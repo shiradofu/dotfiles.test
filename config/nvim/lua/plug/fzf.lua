@@ -315,13 +315,18 @@ return {
     local path = require 'fzf-lua.path'
 
     fzf.setup {
+      hls = {
+        normal = 'Pmenu',
+        border = 'Pmenu',
+        title = 'Pmenu',
+        preview_normal = 'Pmenu',
+        preview_border = 'Pmenu',
+        preview_title = 'Pmenu',
+      },
       winopts = {
         height = 0.9,
         width = 0.9,
         border = 'single',
-        hl = {
-          normal = 'NormalFloat',
-        },
       },
       fzf_opts = {
         ['--info'] = 'default',

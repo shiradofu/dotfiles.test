@@ -27,12 +27,16 @@ local function init_auto_formatting()
     end,
     { nargs = 0 }
   )
-  -- vim.api.nvim_create_user_command('AutoFormatToggleBuf', function()
-  --   print(
-  --     '(Buffer) Auto formatting '
-  --       .. (toggle_enabled 'b' and 'enabled' or 'disabled')
-  --   )
-  -- end, { nargs = 0 })
+  vim.api.nvim_create_user_command(
+    'AutoFormatToggleBuf',
+    function()
+      print(
+        '(Buffer) Auto formatting '
+          .. (toggle_enabled 'b' and 'enabled' or 'disabled')
+      )
+    end,
+    { nargs = 0 }
+  )
 
   -- attach auto-formatting to bufnr
   return function(bufnr, format_fn)
@@ -70,6 +74,24 @@ end
 --        Diagnostics        --
 --                           --
 -------------------------------
+local diagnostic_format = function(d)
+  if d.message == nil then return end
+  if d.code == nil or d.message:find(d.code) then
+    return d.message:find(d.source or '') == nil
+        and string.format('%s [%s]', d.message, d.source)
+      or d.message
+  else
+    return d.message:find(d.source or '') == nil
+        and string.format('%s [%s: %s]', d.message, d.source, d.code)
+      or string.format('%s [%s]', d.message, d.code)
+  end
+end
+vim.diagnostic.config {
+  source = true,
+  virtual_text = { format = diagnostic_format },
+  float = { format = diagnostic_format },
+}
+
 local function init_auto_hover_diagnostics()
   ---Diagnostics の上にカーソルがあれば自動的に表示
   ---vim.lsp.buf.hover() が表示されている間は表示しない
@@ -84,44 +106,10 @@ local function init_auto_hover_diagnostics()
     callback = function()
       if
         not vim.b.auto_hover_diagnostics_disabled
-        and vim.lsp.buf.server_ready()
         and not is_another_hover_win_existing()
       then
-        vim.diagnostic.open_float()
+        vim.diagnostic.open_float { scope = 'cursor' }
       end
-    end,
-  })
-end
-
--------------------------------
---                           --
---        Code Action        --
---                           --
--------------------------------
-local function setup_code_action_menu()
-  local c = require 'code_action_menu'
-
-  -- overwrite builtin function
-  vim.lsp.buf.code_action = c.open_code_action_menu
-
-  local g = vim.api.nvim_create_augroup('MyCodeActionMenu', {})
-  vim.api.nvim_clear_autocmds { group = g }
-  vim.api.nvim_create_autocmd('Filetype', {
-    pattern = 'code-action-menu-menu',
-    group = g,
-    callback = function()
-      vim.keymap.set(
-        'n',
-        '<BS>',
-        c.close_code_action_menu,
-        { noremap = true, silent = true, buffer = true }
-      )
-      vim.keymap.set(
-        'n',
-        '<C-c>',
-        c.close_code_action_menu,
-        { noremap = true, silent = true, buffer = true }
-      )
     end,
   })
 end
@@ -167,12 +155,25 @@ return {
     'williamboman/mason-lspconfig.nvim',
     'nvimtools/none-ls.nvim',
     'jay-babu/mason-null-ls.nvim',
-    { 'weilbith/nvim-code-action-menu', config = setup_code_action_menu },
     {
       'ray-x/lsp_signature.nvim',
-      opts = { bind = true, hint_prefix = '▷  ' },
+      opts = {
+        bind = true,
+        hint_prefix = '▷  ',
+        toggle_key = '<C-l>',
+        floating_window = false,
+        hint_enable = false,
+      },
     },
-    'jose-elias-alvarez/typescript.nvim',
+    {
+      'pmizio/typescript-tools.nvim',
+      dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    },
+    {
+      'mrcjkb/rustaceanvim',
+      version = '^5',
+      lazy = false,
+    },
     'b0o/SchemaStore.nvim',
     -- { 'folke/neodev.nvim', config = true },
   },
@@ -222,7 +223,7 @@ return {
     -- JavaScript/TypeScript
     -----------------------------
     -----------------------------
-    Lsp.tsserver = {
+    Lsp.ts_ls = {
       root_dir = root_pattern('package.json', 'tsconfig.json', 'jsconfig.json'),
       single_file_support = false,
       -- on_attach = function(client)
@@ -244,16 +245,26 @@ return {
         },
       },
     }
-    -- NOTE: Biome can be also used as a LSP server, but it requires
-    --  dynamic registration of capabilities which is supported in
-    --  Neovim 0.10.
+
     Lsp.biome = {}
-    Nls:insert(nfn.formatting.biome)
-    Lsp.eslint = {}
     Nls:insert(nfn.formatting.biome.with {
-      condition = function(utils) return utils.root_has_file 'biome.json' end,
+      condition = function(utils) return utils.root_has_file { 'biome.json' } end,
+      args = {
+        'check',
+        '--apply',
+        '--stdin-file-path',
+        '$FILENAME',
+      },
     })
+    Lsp.eslint = {}
     Nls:insert(nfn.formatting.prettierd.with {
+      filetypes = {
+        'javascript',
+        'javascriptreact',
+        'typescript',
+        'typescriptreact',
+        'vue',
+      },
       env = { PRETTIERD_DEFAULT_CONFIG = vim.env.PRETTIERD_DEFAULT_CONFIG },
       condition = function(utils)
         return not utils.root_has_file {
@@ -266,7 +277,7 @@ return {
     Fmt.javascript = create_fmt_fn { 'null-ls', 'denols' }
     Fmt.typescript = create_fmt_fn { 'null-ls', 'denols' }
     Fmt.javascriptreact = create_fmt_fn { 'null-ls', 'denols' }
-    Fmt.typescriptreact = create_fmt_fn { 'null-ls', 'biome', 'denols' }
+    Fmt.typescriptreact = create_fmt_fn { 'null-ls', 'denols' }
     Fmt.vue = create_fmt_fn { 'null-ls', 'denols' }
     Lsp.prismals = {}
 
@@ -278,6 +289,15 @@ return {
     Lsp.cssls = {}
     Lsp.cssmodules_ls = {}
     Lsp.tailwindcss = {}
+    Nls:insert(nfn.formatting.prettierd.with {
+      filetypes = {
+        'css',
+        'scss',
+        'less',
+        'html',
+      },
+      env = { PRETTIERD_DEFAULT_CONFIG = vim.env.PRETTIERD_DEFAULT_CONFIG },
+    })
     Fmt.html = create_fmt_fn 'null-ls'
     Fmt.css = create_fmt_fn 'null-ls'
     Fmt.sass = create_fmt_fn 'null-ls'
@@ -291,6 +311,12 @@ return {
         )
       end,
     })
+
+    --
+    -- Rust
+    -----------------------------
+    -----------------------------
+    Lsp.rust_analyzer = {}
 
     --
     -- Golang
@@ -379,17 +405,12 @@ return {
     Lsp.sqlls = {}
     Lsp.graphql = {}
     Lsp.grammarly = {}
-    Nls:insert(nfn.code_actions.gitsigns)
     Nls:insert(nfn.diagnostics.cfn_lint)
     Nls:insert(nfn.diagnostics.actionlint)
-    Nls:insert(nfn.diagnostics.editorconfig_checker.with {
-      command = 'editorconfig-checker',
-      extra_args = { '--exclude', 'node_modules' },
-    })
 
     mappings.lsp_diagnostic()
     init_auto_hover_diagnostics()
-    setup_lsp_float_border()
+    -- setup_lsp_float_border()
     local attach_auto_formatting = init_auto_formatting()
 
     local function on_attach(_, bufnr)
@@ -405,7 +426,9 @@ return {
       if diag_config then diag_config() end
     end
 
-    local cap = require('cmp_nvim_lsp').default_capabilities()
+    local cap = require('cmp_nvim_lsp').default_capabilities(
+      vim.lsp.protocol.make_client_capabilities()
+    )
 
     local ml = require 'mason-lspconfig'
     local mn = require 'mason-null-ls'
@@ -423,8 +446,12 @@ return {
           on_attach = on_attach,
           capabilities = cap,
         }, Lsp[server_name] or {})
-        if server_name == 'tsserver' then
-          return require('typescript').setup { server = config }
+        if server_name == 'ts_ls' then
+          return require('typescript-tools').setup(config)
+        end
+        if server_name == 'rust_analyzer' then
+          vim.g.rustaceanvim = { server = config }
+          return
         end
         require('lspconfig')[server_name].setup(config)
       end,

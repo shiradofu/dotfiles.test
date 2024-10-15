@@ -12,47 +12,21 @@ exists() { type "$1" > /dev/null 2>&1; }
 is_mac() { echo "$OSTYPE" | grep darwin -q; }
 is_wsl() { [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; }
 brew_i() { for X; do msg $'\n🍺  Installing '"$X"$':\n'; brew install "$X"; done }
-npm_i()  { for X; do msg $'\n🍔  Installing '"$X"$':\n'; npm install -g "$X"; done }
-go_i()   { for X; do msg $'\n🍙  Installing '"$X"$':\n'; go install "$X"; done }
-pip3_i() { for X; do msg $'\n🧪  Installing '"$X"$':\n'; pip3 install "$X"; done }
 
 DOT_ROOT=$(cd "$(dirname "$0")" && pwd)
 source "$DOT_ROOT/config/zsh/.zshenv"
 TIME=$(date "+%F-%H%M")
 
-# $1: relative path from dotfiles repo root
-# $2: directory where symlink will be created
-deploy() {
-  fullpath="$DOT_ROOT/$1"
-  basename="$(basename "$1")"
-  linkname="$2/$basename"
-  if [ -e "$linkname" ]; then
-    mv "$linkname" "$linkname.$TIME.bak";
-    echo "backed up $linkname"
-  fi
-  ln -s "$fullpath" "$linkname"
-  echo "deployed  $linkname"
-}
-# $1: 'config' or 'data'
-# $2: directory where symlink will be created
-deploy_all_in() {
-  [ -e "$2" ] && [ ! -d "$2" ] && mv "$2" "$2.$TIME.bak"
-  mkdir -p "$2"
-  for d in "$DOT_ROOT/$1"/*; do
-    if [ -d "$d" ]; then
-      deploy "$1/$(basename "$d")" "$2"
-    fi
-  done
-}
-
 #
 # Deploy files
 #
+"$DOT_ROOT/bin/deploy" bin "$HOME" && hash -r
 deploy config/zsh/.zshenv "$HOME"
-deploy config/vim/.vimrc "$HOME"
-deploy bin "$HOME" && hash -r
-deploy_all_in data   "$XDG_DATA_HOME"
-deploy_all_in config "$XDG_CONFIG_HOME"
+deploy --all-in data   "$XDG_DATA_HOME"
+deploy --all-in config "$XDG_CONFIG_HOME"
+[ -d "$HOME/.putty" ] \
+  && mv "$HOME/.putty" "$XDG_CONFIG_HOME/putty" \
+  || mkdir -p "$XDG_CONFIG_HOME/putty"
 [ -f ".gitconfig" ] && mv .gitconfig ".gitconfig.$TIME.bak"
 git config --file "${XDG_CONFIG_HOME}/git/user.gitconfig" user.name "$git_name"
 git config --file "${XDG_CONFIG_HOME}/git/user.gitconfig" user.email "$git_email"
@@ -76,53 +50,18 @@ git clone --depth 1 https://github.com/zdharma-continuum/zinit "${XDG_STATE_HOME
 
 brew_i fzf
 "${HOMEBREW_PREFIX}/opt/fzf/install" --xdg --completion --no-update-rc --no-key-bindings
-brew_i cmake starship fd rg bat tree glow git-delta jq yq tmux navi hyperfine tokei \
-  direnv gh act awscli aws-cdk aws-sam-cli \
-  marp-cli mackup tako8ki/tap/gobang
+brew_i cmake dateutils tree rg fd bat jq yq direnv tmux starship git-delta \
+  yazi navi hyperfine tokei gh act awscli aws-cdk aws-sam-cli marp-cli
 
 #
-# Languages and Package Managers
+# Languages and tools
 #
-msg $'\nc/c++:\n'
-brew_i gcc llvm
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+brew_i gcc llvm go protoc-gen-go python ruby php composer \
+  node deno yarn npm-check-updates
+# installed with mason.nvim doesn't support Apple Silicon
+brew_i golangci-lint
 
-git clone https://github.com/asdf-vm/asdf.git "$ASDF_DIR"
-git -C "$ASDF_DIR" checkout -q "$(git -C "$ASDF_DIR" describe --abbrev=0 --tags)"
-source "$ASDF_DIR/asdf.sh"
-
-msg $'\ngolang:\n'
-asdf plugin add golang     &&
-asdf install golang latest &&
-asdf global golang latest
-go_i golang.org/x/tools/cmd/goimports@latest
-go_i google.golang.org/protobuf/cmd/protoc-gen-go@latest
-
-msg $'\ndeno:\n'
-asdf plugin add deno     &&
-asdf install deno latest &&
-asdf global deno latest
-
-msg $'\nnodejs:\n'
-asdf plugin add nodejs
-asdf list-all nodejs > /dev/null
-asdf install nodejs "$(asdf nodejs resolve lts --latest-available)" &&
-asdf global nodejs "$(asdf nodejs resolve lts --latest-available)"   &&
-npm_i npm yarn pnpm npm-check-updates
-msg $'\n🍔  Installing bun:\n'
-# SHELL='' は zshrc の自動アップデート防止のため
-curl https://bun.sh/install | BUN_INSTALL="$XDG_STATE_HOME/bun" SHELL='' bash
-
-msg $'\npython:\n'
-asdf plugin add python
-asdf install python 2.7.18
-asdf install python latest &&
-asdf global python latest
-pip3 install --upgrade pip
-
-msg $'\nphp:\n'
-brew install php composer
-
-msg $'\ndocker:\n'
 brew_i docker docker-buildx docker-compose lazydocker
 # https://github.com/abiosoft/colima/discussions/273
 mkdir -p "$DOCKER_CONFIG/cli-plugins"
@@ -130,16 +69,10 @@ ln -sfn "$(which docker-compose)" "$DOCKER_CONFIG/cli-plugins/docker-compose"
 ln -sfn "$(which docker-buildx)" "$DOCKER_CONFIG/cli-plugins/docker-buildx"
 docker buildx install
 
-msg $'\nlinters/formatters:\n'
-# installed with mason.nvim doesn't support Apple Silicon
-# TODO: check necessity
-brew_i golangci-lint
-
-msg $'\nmisc:\n'
 brew_i protobuf
 
 #
-# Vim
+# NeoVim
 #
 brew_i vim nvim neovim-remote
 mkdir -p "$XDG_CACHE_HOME"/vim/{undo,swap,backup}
@@ -156,16 +89,13 @@ msg $'\nInstalling Linting/Formatting tools...\n'
 timeout 60 nvim --headless "+lua require('mason-null-ls.ensure_installed')()"
 printf '\n'
 
-msg $'\nasdf reshim:'
-asdf reshim && printf "ok\n" || printf "failed\n"
-
 msg $'\nsetting colorscheme:'
 "$HOME/bin/chcs" --no-os
 
 #
 # Environment-spesific settings
 #
-if is_mac; then "$DOT_ROOT/env/mac/install.sh"; fi
+if is_mac; then "$DOT_ROOT/env/mac/install.sh" "$password"; fi
 if is_wsl; then "$DOT_ROOT/env/wsl/install.sh" "$password"; fi
 
 longest="- $HOMEBREW_PREFIX/bin/zsh (to install plugins)"

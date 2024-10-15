@@ -34,6 +34,14 @@ _finder() {
 }
 
 _safari() {
+  # Safari の開発者機能有効化
+  defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+  defaults write com.apple.Safari IncludeDevelopMenu -bool true
+  defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+
+  # Safari のコンテキストメニューに Web Inspector を表示
+  defaults write -g WebKitDeveloperExtras -bool true
+
   # Show the full URL in the address bar (note: this still hides the scheme)
   defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
 
@@ -54,22 +62,22 @@ _safari() {
   # }"
 }
 
-_chrome() {
-  add_keyboard_shortcut '/Applications/Google Chrome.app' "{
-    'Pin Tab' = '${CMD}${SHIFT}p';
-    'Duplicate Tab' = '${CMD}${SHIFT}o';
-    'Extensions' = '${CMD}${SHIFT}x';
-    'Downloads' = '${CMD}${SHIFT}d';
-    'Mute Site' = '${CMD}m';
-    'Developer Tools' = '${CMD}${SHIFT}i';
-    'JavaScript Console' = '${CMD}${SHIFT}j';
-    'Save Page As…' = '${CMD}${ALT}s';
-    'Minimize' = '${CMD}${SHIFT}${OPT}${CTRL}m';
-    'Email Link' = '${CMD}${SHIFT}${OPT}${CTRL}i';
-    'Hide Google Chrome' = '${CMD}${SHIFT}${OPT}h';
-    'Hide Others' = '${CMD}${SHIFT}${OPT}${CTRL}h';
-  }"
-}
+# _chrome() {
+#   add_keyboard_shortcut '/Applications/Google Chrome.app' "{
+#     'Pin Tab' = '${CMD}${SHIFT}p';
+#     'Duplicate Tab' = '${CMD}${SHIFT}o';
+#     'Extensions' = '${CMD}${SHIFT}x';
+#     'Downloads' = '${CMD}${SHIFT}d';
+#     'Mute Site' = '${CMD}m';
+#     'Developer Tools' = '${CMD}${SHIFT}i';
+#     'JavaScript Console' = '${CMD}${SHIFT}j';
+#     'Save Page As…' = '${CMD}${ALT}s';
+#     'Minimize' = '${CMD}${SHIFT}${OPT}${CTRL}m';
+#     'Email Link' = '${CMD}${SHIFT}${OPT}${CTRL}i';
+#     'Hide Google Chrome' = '${CMD}${SHIFT}${OPT}h';
+#     'Hide Others' = '${CMD}${SHIFT}${OPT}${CTRL}h';
+#   }"
+# }
 
 _obsidian() {
   add_keyboard_shortcut '/Applications/Obsidian.app' "{

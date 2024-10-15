@@ -5,6 +5,8 @@ vim.g.material_style = 'lighter'
 local function hl(name, val) vim.api.nvim_set_hl(0, name, val) end
 
 local function all()
+  -- hl('NormalFloat', { link = 'Pmenu' })
+
   -- lewis6991/gitsigns.nvim
   hl('GitSignsAddNr', { link = 'DiffAdd' })
   hl('GitSignsChangeNr', { link = 'DiffChange' })

@@ -20,7 +20,6 @@ vim.g.mapleader = ' '
 
 function M.misc()
   k('n', '<Leader>w', '<Cmd>w<CR>')
-  k('n', '<Leader>W', '<Cmd>wall<CR>')
   k('n', '<Leader>q', '<Cmd>botright copen<CR>')
   k('n', '<BS>', win.close)
   k('n', 'g<BS>', win.tabclose)
@@ -37,7 +36,6 @@ function M.misc()
   k('n', 'gx', '<Plug>(openbrowser-smart-search-repo-aware)')
   k('v', 'gx', '<Plug>(openbrowser-smart-search)')
   k({'n', 'v'}, 'gX', '<Cmd>OpenGithubFile<CR>')
-  k('n', '<Leader>-', require'user.readonly')
   k('n', 'gG', 'G')
   k('n', 'Q', 'qq')
   k('n', '@', '@q')
@@ -106,12 +104,15 @@ end
 function M.lsp_format(fn)
   k('n', '=', fn, b)
   k('n', '<Leader>=', '<Cmd>AutoFormatToggleGlobal<CR>')
+  k('n', '<Leader>-', '<Cmd>AutoFormatToggleBuf<CR>')
 end
 function M.lsp_hover()
   k('n', 'K', vim.lsp.buf.hover, b)
 end
 function M.lsp_rename() k('n', 'gn', vim.lsp.buf.rename, b) end
-function M.lsp_action() k('n', 'ga', vim.lsp.buf.code_action, b) end
+function M.lsp_action() k('n', 'ga', function ()
+    require('fzf-lua').lsp_code_actions { previewer = 'codeaction_native' }
+end, b) end
 
 function M.tab_move()
   k('n', '<C-n>', 'gt')
@@ -216,7 +217,7 @@ end
 function M.cmp_selection(cmp)
   return {
     ['<Tab>'] = cmp.mapping.confirm { select = true },
-    ['<C-n>'] = function(fallback)
+    ['<C-n>'] = function(_fallback)
       if cmp.visible() then
         if cmp.core.view.custom_entries_view:is_direction_top_down() then
           cmp.select_next_item()
@@ -224,10 +225,10 @@ function M.cmp_selection(cmp)
           cmp.select_prev_item()
         end
       else
-        fallback()
+        cmp.complete()
       end
     end,
-    ['<C-p>'] = function(fallback)
+    ['<C-p>'] = function(_fallback)
       if cmp.visible() then
         if cmp.core.view.custom_entries_view:is_direction_top_down() then
           cmp.select_prev_item()
@@ -235,7 +236,7 @@ function M.cmp_selection(cmp)
           cmp.select_next_item()
         end
       else
-        fallback()
+        cmp.complete()
       end
     end,
     ['<C-l>'] = cmp.mapping.abort(),
@@ -393,8 +394,8 @@ function M.bqf()
     tabc = '<C-t>',
     split = '<C-x>',
     vsplit = '<C-v>',
-    prevfile = '<C-p>',
-    nextfile = '<C-n>',
+    prevfile = '<C-u>',
+    nextfile = '<C-d>',
     stogglevm = '<Tab>',
     pscrollup = '<C-y>',
     pscrolldown = '<C-e>',

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # .envrc 以下のディレクトリでのみ使えるエイリアスを
 # 定義するためのユーティリティ関数
@@ -8,7 +8,12 @@
 #
 # のように記述して使用する
 
-alias_dir=$PWD/.direnv/aliases
+direnv_dir="$PWD"
+while [ ! -f "$direnv_dir/.envrc" ]; do
+  direnv_dir="$(dirname "$direnv_dir")"
+done
+tmp_dir=$(dirname "$(mktemp tmp.XXXXX -ut)")
+alias_dir="$tmp_dir/direnv-aliases$direnv_dir"
 rm -rf "$alias_dir"
 
 alias() {

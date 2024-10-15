@@ -105,8 +105,8 @@ receive-from )
   repo=$(ssh "$remote" ghq list | fzf --no-multi)
   if [ -d "$lroot/$repo" ]; then
     dui=$(git -C "$lroot/$repo" status --ignored -s)
-    stash=$(git -C "$lroot/$repo" git stash list)
-    unpushed=$(git -C "$lroot/$repo" git log --branches --not --remotes --date=iso --pretty=tformat:"[%cd] %s")
+    stash=$(git -C "$lroot/$repo" stash list)
+    unpushed=$(git -C "$lroot/$repo" log --branches --not --remotes --date=iso --pretty=tformat:"[%cd] %s")
   fi
   msg "$remote" "WSL" "$repo" "$dui"
 

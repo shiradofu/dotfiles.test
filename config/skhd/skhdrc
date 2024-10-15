@@ -1,7 +1,0 @@
-ctrl - 1 : open -a 'Spark'
-ctrl - 2 : open -a 'Slack'
-ctrl - 3 : open -a 'LINE'
-ctrl - 8 : open -a 'Obsidian'
-ctrl - 9 : open -a 'Google Chrome'
-ctrl - 0 : open -a 'WezTerm'
-cmd + ctrl + shift - return : $HOME/bin/chcs --toggle

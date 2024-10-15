@@ -128,8 +128,8 @@ case "${DIST}" in
     ;;
   mac )
     if ! exists "xcode-select"; then
-        msg "xcode-select --install"
-        xcode-select --install
+      msg "xcode-select --install"
+      xcode-select --install
     fi
     ;;
 esac

@@ -2,7 +2,7 @@
 # PATH 系設定
 #
 typeset -agU fpath
-fpath=("$ZDOTDIR/completions" ${ASDF_DIR}/completions $fpath)
+fpath=("$ZDOTDIR/completions" $fpath)
 typeset -gaU manpath
 manpath=("$HOMEBREW_PREFIX/share/man" $manpath)
 typeset -gaU infopath
@@ -96,10 +96,14 @@ bindkey '^u' backward-kill-line_or_copy_mode
 #
 # Alias
 #
+disable r
 alias ls='ls --color'
 alias ll='ls -lahF'
-alias de='direnv edit .'
-alias da='direnv allow . && cd .'
+alias dn='direnv edit . && direnv allow . && cd .'
+
+if is_mac; then
+  alias yd='yazi ~/Downloads'
+fi
 
 # https://apple.stackexchange.com/questions/31872/how-do-i-reset-the-scrollback-in-the-terminal-via-a-shell-command
 alias clear="clear && printf '\e[3J'"
@@ -214,7 +218,6 @@ _direnv_hook >/dev/null 2>&1
 #
 # 各種ツール・ウィジェットの設定
 #
-source "${ASDF_DIR}/asdf.sh"
 export FZF_TMUX=1
 export FZF_TMUX_OPTS='-p50%,70%'
 export FZF_DEFAULT_OPTS="--height 50% --reverse --border=sharp --multi \
@@ -319,7 +322,3 @@ export NAVI_PATH="$navidir/main.cheat\
 $(is_mac && printf ":%s/mac.cheat" $navidir)\
 $(is_wsl && printf ":%s/wsl.cheat" $navidir)\
 $(is_pure_linux && printf ":%s/linux.cheat" $navidir)"
-
-export GHQ_ROOT=$(ghq root)
-export MY_REPOS="$GHQ_ROOT/github.com/shiradofu"
-export NVIM_PLUG="$XDG_DATA_HOME/nvim/lazy"

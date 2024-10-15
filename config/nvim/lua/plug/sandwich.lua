@@ -7,13 +7,13 @@ return {
     local recipes = {}
     vim.list_extend(recipes, vim.g['sandwich#default_recipes'])
 
-    local abbr_recipes = {
-      { input = { 'r' }, buns = { '(', ')' }, nesting = 1 },
-      { input = { 'b' }, buns = { '{', '}' }, nesting = 1 },
-      { input = { 's' }, buns = { '[', ']' }, nesting = 1 },
-      { input = { 'a' }, buns = { '<', '>' }, nesting = 1 },
-    }
-    vim.list_extend(recipes, abbr_recipes)
+    -- local abbr_recipes = {
+    --   { input = { 'r' }, buns = { '(', ')' }, nesting = 1 },
+    --   { input = { 'b' }, buns = { '{', '}' }, nesting = 1 },
+    --   { input = { 's' }, buns = { '[', ']' }, nesting = 1 },
+    --   { input = { 'a' }, buns = { '<', '>' }, nesting = 1 },
+    -- }
+    -- vim.list_extend(recipes, abbr_recipes)
 
     -- スペースを含むレシピ
     vim.list_extend(recipes, {
@@ -23,7 +23,7 @@ return {
         match_syntax = 1,
         kind = { 'add', 'replace' },
         action = { 'add' },
-        input = { '{' },
+        input = { '}' },
       },
       {
         buns = { '[ ', ' ]' },
@@ -31,7 +31,7 @@ return {
         match_syntax = 1,
         kind = { 'add', 'replace' },
         action = { 'add' },
-        input = { '[' },
+        input = { ']' },
       },
       {
         buns = { '( ', ' )' },
@@ -39,7 +39,7 @@ return {
         match_syntax = 1,
         kind = { 'add', 'replace' },
         action = { 'add' },
-        input = { '(' },
+        input = { ')' },
       },
       {
         buns = { [[{\s*]], [[\s*}]] },
@@ -47,8 +47,8 @@ return {
         regex = 1,
         match_syntax = 1,
         kind = { 'delete', 'replace', 'textobj' },
-        action = { 'delete' },
-        input = { '{' },
+        acption = { 'delete' },
+        input = { '}' },
       },
       {
         buns = { [=[\[\s*]=], [=[\s*\]]=] },
@@ -57,7 +57,7 @@ return {
         match_syntax = 1,
         kind = { 'delete', 'replace', 'textobj' },
         action = { 'delete' },
-        input = { '[' },
+        input = { ']' },
       },
       {
         buns = { [[(\s*]], [[\s*)]] },
@@ -66,7 +66,7 @@ return {
         match_syntax = 1,
         kind = { 'delete', 'replace', 'textobj' },
         action = { 'delete' },
-        input = { '(' },
+        input = { ')' },
       },
     })
 

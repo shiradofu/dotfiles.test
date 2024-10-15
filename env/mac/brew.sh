@@ -13,10 +13,8 @@ brew_interactive() {
     send -- \"${password}\n\"
   "
 }
+
 brew_interactive adobe-creative-cloud
 brew_interactive session-manager-plugin
-if [ "$(uname -m)" != "arm64" ] || [ -f /usr/libexec/rosetta/oahd ]; then
-  brew_interactive google-japanese-ime
-fi
 
 unset password

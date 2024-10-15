@@ -145,6 +145,9 @@ sudo defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 52 
 ## Spotlight
 sudo defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "<dict><key>enabled</key><false/></dict>"
 sudo defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 65 "<dict><key>enabled</key><false/></dict>"
+## Input sources switching (Ctrl-Space)
+sudo defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60 "<dict><key>enabled</key><false/></dict>"
+sudo defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dict><key>enabled</key><false/></dict>"
 
 #
 #  Misc
@@ -154,14 +157,6 @@ sudo defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 65 
 # クイックメモを無効化
 defaults write com.apple.dock wvous-br-corner -int 1
 defaults write com.apple.dock wvous-br-modifier -int 1048576
-
-# Safari の開発者機能有効化
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-
-# Safari のコンテキストメニューに Web Inspector を表示
-defaults write -g WebKitDeveloperExtras -bool true
 
 # 未確認のアプリケーションを実行する際のダイアログを無効にする
 defaults write com.apple.LaunchServices LSQuarantine -bool false

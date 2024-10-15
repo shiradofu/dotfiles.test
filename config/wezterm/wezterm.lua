@@ -20,6 +20,7 @@ end)
 
 local config = {
   use_ime = true,
+  macos_forward_to_ime_modifier_mask = 'CTRL',
   window_decorations = 'RESIZE',
   hide_tab_bar_if_only_one_tab = true,
   window_padding = { left = 0, right = 0, top = 0, bottom = 0 },
@@ -62,7 +63,7 @@ if ok then chcs(config) end
 if is_unix() then
   merge(config, {
     default_prog = { 'zsh' },
-    font_size = 13,
+    font_size = 14,
   })
 end
 
@@ -72,5 +73,7 @@ if is_windows() then
     font_size = 9,
   })
 end
+
+merge(config, { window_background_opacity = 0.9 })
 
 return config

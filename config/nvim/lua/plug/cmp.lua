@@ -2,35 +2,41 @@ return {
   'hrsh7th/nvim-cmp',
   event = { 'InsertEnter', 'CmdlineEnter' },
   dependencies = {
-    'L3MON4D3/LuaSnip',
+    'onsails/lspkind.nvim',
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/cmp-buffer',
     'hrsh7th/cmp-path',
     'hrsh7th/cmp-cmdline',
-    'saadparwaiz1/cmp_luasnip',
     'lukas-reineke/cmp-rg',
-    'davidsierradz/cmp-conventionalcommits',
+    'lukas-reineke/cmp-under-comparator',
   },
   config = function()
     local cmp = require 'cmp'
-    local luasnip = require 'luasnip'
     local maps = require('user.mappings').cmp_selection(cmp)
-
-    local view = {
-      entries = {
-        name = 'custom',
-        selection_order = 'near_cursor',
-      },
-    }
+    local lspkind = require 'lspkind'
+    local compare = cmp.config.compare
 
     cmp.setup {
-      snippet = {
-        -- REQUIRED - you must specify a snippet engine
-        expand = function(args) luasnip.lsp_expand(args.body) end,
+      sorting = {
+        comparators = {
+          compare.offset,
+          compare.exact,
+          compare.scopes,
+          compare.score,
+          compare.recently_used,
+          require('cmp-under-comparator').under,
+          compare.kind,
+          compare.locality,
+          compare.sort_text,
+          compare.length,
+          compare.order,
+        },
       },
+      completion = { autocomplete = false },
+      snippet = { expand = function(args) vim.snippet.expand(args.body) end },
       window = {
-        completion = cmp.config.window.bordered { border = 'single' },
-        documentation = cmp.config.window.bordered { border = 'single' },
+        completion = cmp.config.window.bordered(),
+        documentation = cmp.config.window.bordered(),
       },
       mapping = {
         ['<Tab>'] = { i = maps['<Tab>'] },
@@ -38,11 +44,27 @@ return {
         ['<C-p>'] = { i = maps['<C-p>'] },
         ['<C-l>'] = { i = maps['<C-l>'] },
       },
-      view = view,
+      preselect = cmp.PreselectMode.None,
+      view = {
+        entries = {
+          name = 'custom',
+          selection_order = 'near_cursor',
+        },
+      },
+      formatting = {
+        format = lspkind.cmp_format {
+          mode = 'symbol',
+          show_labelDetails = true,
+          menu = {
+            nvim_lsp = '[LSP]',
+            buffer = '[Buf]',
+            rg = '[Rg]',
+          },
+        },
+      },
+      experimental = { ghost_text = false },
       sources = cmp.config.sources {
-        { name = 'luasnip' },
         { name = 'nvim_lsp' },
-        { name = 'nvim_lua' },
         {
           name = 'buffer',
           option = {
@@ -68,6 +90,7 @@ return {
           name = 'rg',
           option = {
             additional_arguments = "-g '!*.svg'"
+              .. " -g '!composer.lock'"
               .. " -g '!package-lock.json'"
               .. " -g '!yarn.lock'",
           },
@@ -100,10 +123,12 @@ return {
       },
     })
 
-    cmp.setup.filetype('gitcommit', {
-      sources = cmp.config.sources {
-        { name = 'conventionalcommits' },
-        { name = 'buffer' },
+    cmp.setup.filetype('rust', {
+      snippet = {
+        expand = function(args)
+          args.body = args.body:gsub('…(.*)$', '$0%1')
+          vim.snippet.expand(args.body)
+        end,
       },
     })
   end,

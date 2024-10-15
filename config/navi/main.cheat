@@ -48,3 +48,15 @@ read && [ "$REPLY" = 'y' ] && \
 
 $ backup_from: ls -1 /Volumes | grep -v 'Macintosh HD'
 $ backup_to: ls -1 /Volumes | grep -v -e 'Macintosh HD' -e '<backup_from>'
+
+% yt
+
+# download youtube videoes as mp3 and copy them to Apple Music
+read && [ "$REPLY" = 'y' ] && \
+yt-dlp -x --audio-format mp3 \
+  --parse-metadata "playlist_index:%(track_number)s" \
+  --add-metadata \
+  -o "%(title)s.%(ext)s" \
+  "<URL>" && \
+mv ./*.mp3 "${HOME}/Music/Music/Media.localized/Automatically Add to Music.localized/"
+

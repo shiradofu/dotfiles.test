@@ -9,8 +9,8 @@ HISTSIZE=1000000
 SAVEHIST=1000000
 
 # lazy に置くと開いた直後のレスポンスが悪くなる
-bindkey -e '^G' ghq-fzf
-bindkey -e '^R' fzf-history-widget
+bindkey -e '^g' ghq-fzf
+bindkey -e '^r' fzf-history-widget
 bindkey -s '^[a' '^Qtms^M'
 
 # lazy 読み込み

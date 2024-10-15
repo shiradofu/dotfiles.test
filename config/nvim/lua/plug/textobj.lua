@@ -91,40 +91,40 @@ endfunction
       },
     })
 
-    vim.fn['textobj#user#plugin']('bracket', {
-      rounded = {
-        pattern = { '(', ')' },
-        ['select-i'] = 'ir',
-        ['select-a'] = 'ar',
-      },
-      brace = {
-        pattern = { '{', '}' },
-        ['select-i'] = 'ib',
-        ['select-a'] = 'ab',
-      },
-      square = {
-        pattern = { [[\[]], [=[\]]=] },
-        ['select-i'] = 'is',
-        ['select-a'] = 'as',
-      },
-      angle = {
-        pattern = { '<', '>' },
-        ['select-i'] = 'ia',
-        ['select-a'] = 'aa',
-      },
-    })
+    -- vim.fn['textobj#user#plugin']('bracket', {
+    --   rounded = {
+    --     pattern = { '(', ')' },
+    --     ['select-i'] = 'ir',
+    --     ['select-a'] = 'ar',
+    --   },
+    --   brace = {
+    --     pattern = { '{', '}' },
+    --     ['select-i'] = 'ib',
+    --     ['select-a'] = 'ab',
+    --   },
+    --   square = {
+    --     pattern = { [[\[]], [=[\]]=] },
+    --     ['select-i'] = 'is',
+    --     ['select-a'] = 'as',
+    --   },
+    --   angle = {
+    --     pattern = { '<', '>' },
+    --     ['select-i'] = 'ia',
+    --     ['select-a'] = 'aa',
+    --   },
+    -- })
 
     vim.fn['textobj#user#plugin']('linewise', {
       rounded = {
-        ['select-a'] = 'aR',
+        ['select-a'] = 'a)',
         ['select-a-function'] = 'TextObjectLinewiseRounded',
       },
       brace = {
-        ['select-a'] = 'aB',
+        ['select-a'] = 'a}',
         ['select-a-function'] = 'TextObjectLinewiseBrace',
       },
       square = {
-        ['select-a'] = 'aS',
+        ['select-a'] = 'a]',
         ['select-a-function'] = 'TextObjectLinewiseSquare',
       },
     })

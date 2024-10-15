@@ -12,6 +12,31 @@ return {
     keys = { { '<Plug>(quickhl-', mode = { 'n', 'x' } } },
   },
   {
+    'kevinhwang91/nvim-hlslens',
+    event = 'CmdlineEnter',
+    dependencies = {
+      { 'shiradofu/nice-scroll.nvim', config = true },
+    },
+    opts = { calm_down = true, nearest_only = true },
+  },
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    opts = {
+      labels = 'IJKHLUONMUPY():<>{}FGEAVCBWDRSZXTQ',
+      search = {
+        incremental = true,
+      },
+      modes = {
+        search = {
+          enabled = true,
+          jump = { history = false, register = false, nohlsearch = true },
+        },
+        char = { enabled = false },
+      },
+    },
+  },
+  {
     'haya14busa/vim-asterisk',
     keys = '<Plug>(asterisk-',
     init = function() vim.g['asterisk#keeppos'] = 1 end,
@@ -23,10 +48,25 @@ return {
     opts = {},
   },
   {
+    'folke/todo-comments.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    event = 'VeryLazy',
+    opts = { signs = false },
+  },
+  {
+    'kevinhwang91/nvim-bqf',
+    ft = 'qf',
+    dependencies = 'nvim-treesiter/nvim-treesitter',
+    opts = {
+      preview = { delay_syntax = 0 },
+      func_map = require('user.mappings').bqf(),
+    },
+  },
+  {
     'danymat/neogen',
     cmd = 'Neogen',
     dependencies = 'nvim-treesitter/nvim-treesitter',
-    opts = { snippet_engine = 'luasnip' },
+    opts = { snippet_engine = 'nvim' },
   },
 
   --------------------------------------------------------------
@@ -64,6 +104,17 @@ return {
   -- Git
 
   {
+    'lewis6991/gitsigns.nvim',
+    event = 'VeryLazy',
+    opts = {
+      signcolumn = false,
+      numhl = true,
+      on_attach = function()
+        require('user.mappings').gitsigns(package.loaded.gitsigns)
+      end,
+    },
+  },
+  {
     'akinsho/git-conflict.nvim',
     event = 'VeryLazy',
     config = true,
@@ -84,7 +135,13 @@ return {
   --------------------------------------------------------------
   -- Colorscheme
 
-  { 'xiyaowong/nvim-transparent', event = 'ColorScheme' },
+  {
+    'xiyaowong/nvim-transparent',
+    event = 'ColorScheme',
+    opts = {
+      exclude_groups = { 'FzfLuaNormal' },
+    },
+  },
   { 'cocopon/iceberg.vim' },
   { 'rose-pine/neovim', name = 'rose-pine' },
 }
